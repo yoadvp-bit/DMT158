@@ -212,10 +212,17 @@ def feature_engineering(data):
     daily_data = data.copy()
     daily_data['date'] = daily_data['time'].dt.date
 
-    print(daily_data.head(20))
+    value_vars = [col for col in daily_data.columns if col not in ['id', 'date', 'time', 'activity']]
+
+    daily_long = daily_data.melt(
+        id_vars=['id', 'date'],
+        value_vars=value_vars,
+        var_name='variable',
+        value_name='value'
+    )
     
     # Calculate daily averages for each variable
-    daily_agg = daily_data.groupby(['id', 'date', 'variable'])['value'].mean().reset_index()
+    daily_agg = daily_long.groupby(['id', 'date', 'variable'])['value'].mean().reset_index()
     
     # Pivot to have variables as columns
     daily_pivot = daily_agg.pivot_table(
